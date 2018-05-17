@@ -1,7 +1,6 @@
 /*
 ** Generates the tables for the inventory PoC.
 **
-** A rack may contain multiple servers.
 ** A server will contain multiple NICs
 ** A nic may have multiple IP addresses associated with it.
 **
@@ -13,26 +12,12 @@
 drop table if exists inventory.ips;
 drop table if exists inventory.nics;
 drop table if exists inventory.servers;
-drop table if exists inventory.racks;
-
-create table if not exists racks (
-  id integer not null auto_increment primary key,
-  name varchar(20),
-  commentary varchar(40)
-);
-
 
 create table if not exists inventory.servers (
   id integer not null auto_increment primary key, -- This is different from the SID!
   servicetag varchar(10) not null unique,
   sid integer not null unique,
-  sotckid integer not null unique,
-  rack_id integer,
-  position integer,
-  foreign key (rack_id)
-    references inventory.racks(id)
-    on update cascade
-    on delete cascade
+  stockid integer not null unique
 );
 
 create table if not exists inventory.nics (
