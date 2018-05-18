@@ -22,20 +22,42 @@ create table if not exists inventory.servers (
 
 create table if not exists inventory.nics (
   id integer not null auto_increment primary key,
-  server_id integer,
-  mac char(12),
+  serverid integer,
+  mac char(17)/*,
   foreign key (server_id)
     references inventory.servers(id)
     on update cascade
-    on delete cascade
+    on delete cascade */
 );
 
 create table if not exists inventory.ips (
   id integer not null auto_increment primary key,
-  nic_id integer,
-  ip integer unsigned,
+  nicid integer,
+  ip varchar(20) /*,
   foreign key (nic_id)
     references inventory.nics(id)
     on update cascade
-    on delete cascade
+    on delete cascade */
 );
+
+/*
+  For simple security (rather than using auth tokens) just use username and password.
+  Passwords are stored as SHA2 512 bit, as this is natively supported by MySQL
+ */
+
+drop table if exists inventory.users;
+
+create table if not exists inventory.users (
+  id integer not null auto_increment primary key,
+  name varchar(20) not null,
+  hash char(128)
+);
+
+insert into inventory.users (name, hash) values
+  ('tim', sha2('swordfish123', 512)),
+  ('snowy', sha2('woof!woof!', 512)),
+   ('andy', sha2('creamy', 512)),
+   ('andy', sha2('dreamy', 512));
+insert into inventory.servers (servicetag, sid, stockid) values ('ABC123', 12345, 54321), ('XYZ123', 12346, 54322);
+insert into nics (serverid, mac) values (1, '08:00:2B:12:34:56'),  (2, '08:00:2B:12:34:57');
+insert into ips (nicid, ip)  values (2, '10.0.1.1'), (2, '10.0.1.2');
