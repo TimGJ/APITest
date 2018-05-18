@@ -17,7 +17,8 @@ create table if not exists inventory.servers (
   id integer not null auto_increment primary key, -- This is different from the SID!
   servicetag varchar(10) not null unique,
   sid integer not null unique,
-  stockid integer not null unique
+  stockid integer not null unique,
+  comment varchar(80)
 );
 
 create table if not exists inventory.nics (

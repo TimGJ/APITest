@@ -74,7 +74,7 @@ def GetServer(id):
     u = session.query(Server).filter(Server.id == id)
     session.close()
     if u.count():
-        return u[0]
+        return {'id': u[0].id, 'tag': u[0].servicetag, 'sid': u[0].sid, 'stockid': u[0].stockid}
 
 
 def GetServers():
@@ -87,8 +87,49 @@ def GetServers():
     session = Session()
     u = session.query(Server).all()
     session.close()
-    return u
+    return [{'id': r.id, 'tag': r.servicetag, 'sid': r.sid, 'stockid': r.stockid} for r in u]
 
+def CreateServer(server):
+    """
+    Creates a server record in the database
+
+    :param server: Dictionary containing servicetag, sid and stockid
+    :return:
+    """
+    logging.debug("Got server: {}".format(server))
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    record = Server(servicetag=server['tag'], sid=server['sid'], stockid=server['stockid'])
+    session.add(record)
+    try:
+        session.commit()
+    except sqlalchemy.exc.IntegrityError as e:
+        rv = {"error": e}
+    else:
+        rv = server
+        rv['id'] = record.id
+    logging.debug("Inserted server ID {}".format(record.id))
+    session.close()
+    logging.debug("Returning {}".format(server))
+    return rv
+
+def DeleteServer(id):
+    """
+    Deletes a server fromt he database
+    :param id: id (PK) of the server to delete. integer
+    :return: boolean. True if deletion was successful, else False
+    """
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    server = session.query(Server).filter(Server.id == id)
+    deleted = False
+    if server.count():
+        logging.debug("Deleting server ID {}".format(id))
+        server.delete()
+        deleted = True
+    session.commit()
+    session.close()
+    return deleted
 
 def GetNIC(id):
     """
@@ -149,4 +190,8 @@ def GetIPs():
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    logging.info("Did you really want to call this?")
+    CreateServer({'tag':'xlerb', 'sid':22222, 'stockid':33333})
+    CreateServer({'tag':'xyzzy', 'sid':22223, 'stockid':33334})
+    CreateServer({'tag':'foo',   'sid':22224, 'stockid':33335})
+    CreateServer({'tag':'bar',   'sid':22225, 'stockid':33336})
+

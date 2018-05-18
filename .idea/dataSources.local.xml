@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="dataSourceStorageLocal">
+    <data-source name="inventory@localhost" uuid="ac921263-611f-40b5-9d47-d9908ef0bd93">
+      <database-info product="MySQL" version="10.0.34-MariaDB-0ubuntu0.16.04.1" jdbc-version="4.2" driver-name="MariaDB connector/J" driver-version="2.2.1">
+        <extra-name-characters>#@</extra-name-characters>
+        <identifier-quote-string>`</identifier-quote-string>
+      </database-info>
+      <case-sensitivity plain-identifiers="exact" quoted-identifiers="exact" />
+      <secret-storage>master_key</secret-storage>
+      <user-name>tim</user-name>
+      <introspection-schemas>*:inventory</introspection-schemas>
+    </data-source>
+  </component>
+</project>
