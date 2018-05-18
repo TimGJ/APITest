@@ -87,7 +87,7 @@ def GetServers():
     session = Session()
     u = session.query(Server).all()
     session.close()
-    return [{'id': r.id, 'tag': r.servicetag, 'sid': r.sid, 'stockid': r.stockid} for r in u]
+    return [{'id': r.id, 'tag': r.servicetag, 'sid': r.sid, 'stockid': r.stockid, 'comment': r.comment} for r in u]
 
 def CreateServer(server):
     """
@@ -99,7 +99,7 @@ def CreateServer(server):
     logging.debug("Got server: {}".format(server))
     Session = sessionmaker(bind=engine)
     session = Session()
-    record = Server(servicetag=server['tag'], sid=server['sid'], stockid=server['stockid'])
+    record = Server(servicetag=server.get('tag'), sid=server.get('sid'), stockid=server.get('stockid'), comment=server.get('comment'))
     session.add(record)
     try:
         session.commit()
@@ -130,6 +130,23 @@ def DeleteServer(id):
     session.commit()
     session.close()
     return deleted
+
+def UpdateServer(id, details):
+    """
+    Updates the server with fields in the values dictionary
+    :param id:
+    :param values:
+    :return:
+    """
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    server = session.query(Server).filter(Server.id == id).first()
+    for k, v in details.items():
+        if v:
+            setattr(server, k, v)
+    session.commit()
+    session.close()
+
 
 def GetNIC(id):
     """
@@ -190,8 +207,11 @@ def GetIPs():
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    CreateServer({'tag':'xlerb', 'sid':22222, 'stockid':33333})
-    CreateServer({'tag':'xyzzy', 'sid':22223, 'stockid':33334})
-    CreateServer({'tag':'foo',   'sid':22224, 'stockid':33335})
-    CreateServer({'tag':'bar',   'sid':22225, 'stockid':33336})
+    create = False
+    if create:
+        CreateServer({'tag':'xlerb', 'sid':22222, 'stockid':33333})
+        CreateServer({'tag':'xyzzy', 'sid':22223, 'stockid':33334})
+        CreateServer({'tag':'foo',   'sid':22224, 'stockid':33335})
+        CreateServer({'tag':'bar',   'sid':22225, 'stockid':33336})
 
+    UpdateServer(1, {"comment": "Foo!"})
