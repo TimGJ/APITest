@@ -20,3 +20,7 @@ system proof of concept.
 ### Delete a server
 
 `curl -u tim:swordfish123 http://localhost:5000/inventory/api/v1/server/17 -X DELETE`
+
+### Update a server
+
+`curl -utim:swordfish123 -i -H "Content-Type: application/json" -X PUT -d '{"comment": "Fuck me backwards! It worked!"}' http://localhost:5000/inventory/api/v1/server/2`
