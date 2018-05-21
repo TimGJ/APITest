@@ -23,8 +23,9 @@ create table if not exists inventory.servers (
 
 create table if not exists inventory.nics (
   id integer not null auto_increment primary key,
-  serverid integer,
-  mac char(17)/*,
+  sid integer,
+  mac char(17),
+  comment varchar(80)/*,
   foreign key (server_id)
     references inventory.servers(id)
     on update cascade
@@ -59,6 +60,7 @@ insert into inventory.users (name, hash) values
   ('snowy', sha2('woofwoof', 512)),
   ('andy', sha2('creamy', 512)),
   ('kyle', sha2('dreamy', 512));
+
 insert into inventory.servers (servicetag, sid, stockid) values ('ABC123', 12345, 54321), ('XYZ123', 12346, 54322);
-insert into nics (serverid, mac) values (1, '08:00:2B:12:34:56'),  (2, '08:00:2B:12:34:57');
+insert into nics (sid, mac) values (1, '08:00:2B:12:34:56'),  (2, '08:00:2B:12:34:57');
 insert into ips (nicid, ip)  values (2, '10.0.1.1'), (2, '10.0.1.2');

@@ -27,7 +27,7 @@ class NIC(Base):
     __table__ = Table('nics', metadata, autoload=True)
 
     def __repr__(self):
-        return "{}: {}".format(self.mac, self.serverid)
+        return "{}: {}".format(self.mac, self.sid)
 
 class IP(Base):
     """
@@ -160,7 +160,7 @@ def GetNIC(id):
     u = session.query(NIC).filter(NIC.id == id)
     session.close()
     if u.count():
-        return u[0]
+        return {'id': u[0].id, 'mac': u[0].mac, 'sid': u[0].sid}
 
 
 def GetNICs():
@@ -173,7 +173,66 @@ def GetNICs():
     session = Session()
     u = session.query(NIC).all()
     session.close()
-    return u
+    return [{'id': r.id, 'mac': r.mac, 'sid': r.sid, 'comment': r.comment} for r in u]
+
+def CreateNIC(nic):
+    """
+    Creates a server record in the database
+
+    :param nic: Dictionary containing mac and sid
+    :return: dict
+    """
+    logging.debug("Got nic: {}".format(nic))
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    record = NIC(mac=nic.get('mac'), sid=nic.get('sid'), comment=nic.get('comment'))
+    session.add(record)
+    try:
+        session.commit()
+    except sqlalchemy.exc.IntegrityError as e:
+        rv = {"error": e}
+    else:
+        rv = nic
+        rv['id'] = record.id
+    logging.debug("Inserted nic ID {}".format(record.id))
+    session.close()
+    logging.debug("Returning {}".format(nic))
+    return rv
+
+def DeleteNIC(id):
+    """
+    Deletes a NIC from the database
+    :param id: id (PK) of the nic to delete. integer
+    :return: boolean. True if deletion was successful, else False
+    """
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    nic = session.query(NIC).filter(NIC.id == id)
+    deleted = False
+    if nic.count():
+        logging.debug("Deleting NIC ID {}".format(id))
+        nic.delete()
+        deleted = True
+    session.commit()
+    session.close()
+    return deleted
+
+def UpdateNIC(id, details):
+    """
+    Updates the server with fields in the values dictionary
+    :param id:
+    :param values:
+    :return:
+    """
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    nic = session.query(NIC).filter(NIC.id == id).first()
+    for k, v in details.items():
+        if v:
+            setattr(nic, k, v)
+    session.commit()
+    session.close()
+
 
 
 def GetIP(id):

@@ -117,9 +117,82 @@ class ServerAPI(Resource):
         return {'server': marshal(server, server_fields)}
 
 
+#---nics----------------------------------------------------------------------------------------------
+
+nic_fields = {
+    'sid':     fields.Integer,
+    'mac':     fields.String,
+    'comment': fields.String,
+    'uri':     fields.Url('nic')
+}
+
+class NICListAPI(Resource):
+    decorators = [auth.login_required]
+
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('sid',    type=int, required=True, help='No service ID provided', location='json')
+        self.reqparse.add_argument('mac',    type=str, required=True, help='No MAC address provided', location='json')
+        self.reqparse.add_argument('comment',type=str, location='json')
+        super(NICListAPI, self).__init__()
+
+    def get(self):
+        logging.debug("Getting nic list...")
+        return {'nic': [marshal(nic, nic_fields) for nic in db.GetNICs()]}
+
+    def post(self):
+        args = self.reqparse.parse_args()
+        nic = {
+            'mac': args['mac'],
+            'sid': args['sid'],
+            'comment': args['comment']
+        }
+        updated = db.CreateNIC(nic)
+        logging.debug("Got {}".format(updated))
+        if 'id' in updated:
+            return {'nic': marshal(updated, nic_fields)}, http.HTTPStatus.CREATED.value
+        else:
+            abort(http.HTTPStatus.CONFLICT.value)
+
+class NICAPI(Resource):
+    decorators = [auth.login_required]
+
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('sid', type=int, location='json')
+        self.reqparse.add_argument('mac', type=str, location='json')
+        self.reqparse.add_argument('comment',type=str, location='json')
+        super(NICAPI, self).__init__()
+
+    def get(self, id):
+        nic = db.GetNIC(id)
+        if nic:
+            return {'nic': marshal(nic, nic_fields)}
+        else:
+            abort(404)
+
+    def delete(self, id):
+        if db.DeleteNIC(id):
+            return '', http.HTTPStatus.OK.value
+        else:
+            abort(http.HTTPStatus.NOT_FOUND.value)
+
+    def put(self, id):
+        nic = db.GetNIC(id)
+        if not nic:
+            abort(http.HTTPStatus.NOT_FOUND.value)
+        args = self.reqparse.parse_args()
+        for k, v in args.items():
+            if k not in ['id'] and v:
+                nic[k] = v
+        db.UpdateNIC(id, nic)
+        return {'nic': marshal(nic, nic_fields)}
+
+
 api.add_resource(ServerListAPI, '/inventory/api/v1/servers', endpoint='servers')
 api.add_resource(ServerAPI, '/inventory/api/v1/server/<int:id>', endpoint='server')
-
+api.add_resource(NICListAPI, '/inventory/api/v1/nics', endpoint='nics')
+api.add_resource(NICAPI, '/inventory/api/v1/nic/<int:id>', endpoint='nic')
 
 
 if __name__ == '__main__':
