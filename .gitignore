@@ -1,3 +1,4 @@
+*.cfg
 *.xml
 *.pyc
 __pycache__/
