@@ -52,7 +52,7 @@ server_fields = {
 }
 
 class ServerListAPI(Resource):
-    decorators = [auth.login_required]
+    #decorators = [auth.login_required]
 
     def __init__(self):
         self.reqparse = reqparse.RequestParser()

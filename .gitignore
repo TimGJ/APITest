@@ -1,3 +1,4 @@
+*.ini
 *.cfg
 *.xml
 *.pyc
