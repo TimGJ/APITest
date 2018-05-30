@@ -14,7 +14,7 @@ import string
 
 class Subsystem:
     """
-    Network interface controller, as returned by RedFish
+    Generic template to be used as the parent class for various subsystems - e.g. NICs
     """
 
     IgnoreAttributes = ['IgnoreAttributes', 'Description'] # Attributes to ignore from the class
@@ -61,15 +61,27 @@ class Subsystem:
 
 
 class NIC(Subsystem):
+    """
+    Network interface
+    """
     pass
 
 class SC(Subsystem):
+    """
+    Storage controller
+    """
     pass
 
 class CPU(Subsystem):
+    """
+    CPU
+    """
     pass
 
 class Disk(Subsystem):
+    """
+    Disk or other storage device subtended from a storage controller
+    """
     pass
 
 class System:
